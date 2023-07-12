@@ -24,7 +24,10 @@ export class ArticlesController {
   findAll() {
     return this.articlesService.findAll();
   }
-
+  @Get('drafts')
+  findDratfs() {
+    return this.articlesService.findDrafts();
+  }
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.articlesService.findOne(+id);
