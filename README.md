@@ -1,12 +1,27 @@
 ## Description
 
-🍻
+Bloguim: a simple blog...
 
 ## Installation
+```bash
+# set up .env (add your db user, password, dbname)
+
+$ cp .env.example .env
+```
 
 ```bash
 
 $ npm install
+```
+
+```bash
+# database migration
+$ npm run db:migrate
+```
+
+```bash
+# seed some sample data
+$ npm run seed
 ```
 
 ## Running the app

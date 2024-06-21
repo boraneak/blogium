@@ -1,70 +1,72 @@
 import { PrismaClient } from '@prisma/client';
+import { faker } from '@faker-js/faker';
+import 'dotenv/config';
 
 // initialize Prisma Client
 const prisma = new PrismaClient();
 
 async function main() {
-  // create two dummy users
-  const user1 = await prisma.user.upsert({
-    where: { email: 'svmt@user.com' },
-    update: {},
-    create: {
-      email: 'svmt@user.com',
-      name: 'svmt',
-      password: 'username',
-    },
-  });
-  const user2 = await prisma.user.upsert({
-    where: { email: 'username@user.com' },
-    update: {},
-    create: {
-      email: 'username@user.com',
-      name: 'user',
-      password: 'password',
-    },
-  });
-  // create two dummy articles
-  const post1 = await prisma.article.upsert({
-    where: { title: 'Prisma Adds Support for MongoDB' },
-    update: { authorId: user1.id },
-    create: {
-      title: 'Prisma Adds Support for MongoDB',
-      body: 'Support for MongoDB has been one of the most requested features since the initial release of...',
-      description:
-        "We are excited to share that today's Prisma ORM release adds stable support for MongoDB!",
-      published: false,
-      authorId: user1.id,
-    },
-  });
+  // Delete existing data before executing
+  await prisma.article.deleteMany({});
+  await prisma.user.deleteMany({});
 
-  const post2 = await prisma.article.upsert({
-    where: { title: "What's new in Prisma? (Q1/22)" },
-    update: { authorId: user2.id },
-    create: {
-      title: "What's new in Prisma? (Q1/22)",
-      body: 'Our engineers have been working hard, issuing new releases with many improvements...',
-      description:
-        'Learn about everything in the Prisma ecosystem and community from January to March 2022.',
-      published: true,
-      authorId: user1.id,
-    },
-  });
-  const post3 = await prisma.article.upsert({
-    where: { title: 'Prisma Client Just Became a Lot More Flexible' },
-    update: {},
-    create: {
-      title: 'Prisma Client Just Became a Lot More Flexible',
-      body: 'Prisma Client extensions provide a powerful new way to add functionality to Prisma in a type-safe manner...',
-      description:
-        'This article will explore various ways you can use Prisma Client extensions to add custom functionality to Prisma Client..',
-      published: true,
-    },
-  });
+  const users = [];
+  for (let i = 0; i < 3; i++) {
+    const user = await prisma.user.create({
+      data: {
+        email: faker.internet.email(),
+        name: `${faker.person.firstName()} ${faker.person.lastName()}`,
+        password: faker.internet.password(),
+      },
+    });
+    users.push(user);
+  }
 
-  console.log({ user1, user2, post1, post2, post3 });
+  const posts = [
+    {
+      title: 'Getting Started with Prisma',
+      body: 'Prisma is a next-generation ORM. It makes database access easy with an auto-generated query builder for TypeScript and Node.js. Prisma helps you write queries in a type-safe way.',
+      description: 'An introduction to getting started with Prisma ORM.',
+      published: true,
+      authorId: users[0].id,
+    },
+    {
+      title: 'Advanced Prisma Techniques',
+      body: 'Learn advanced techniques to get the most out of Prisma. From complex queries to database migrations, we cover it all. Take your Prisma skills to the next level.',
+      description: 'A deep dive into advanced Prisma techniques.',
+      published: true,
+      authorId: users[1].id,
+    },
+    {
+      title: 'Prisma and GraphQL',
+      body: 'Prisma integrates seamlessly with GraphQL. Learn how to set up Prisma as a GraphQL server. Enhance your GraphQL API with Prisma’s powerful features.',
+      description: 'Using Prisma in combination with GraphQL.',
+      published: true,
+      authorId: users[2].id,
+    },
+    {
+      title: 'Optimizing Prisma Performance',
+      body: 'Optimize your Prisma setup for better performance. Learn about indexing, query optimization, and more. Ensure your application runs smoothly and efficiently.',
+      description: 'Tips and tricks for optimizing Prisma performance.',
+      published: true,
+      authorId: users[0].id,
+    },
+    {
+      title: 'Migrating to Prisma',
+      body: 'Thinking about migrating to Prisma? This guide covers the migration process in detail. Learn how to move your existing database setup to Prisma without hassle.',
+      description: 'A guide to migrating your database to Prisma.',
+      published: true,
+      authorId: users[1].id,
+    },
+  ];
+
+  for (const post of posts) {
+    await prisma.article.create({ data: post });
+  }
+
+  console.log('Database has been seeded with new users and posts.');
 }
 
-// execute the main function
 main()
   .catch((e) => {
     console.error(e);
